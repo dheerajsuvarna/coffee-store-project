@@ -4,3 +4,19 @@ node_modules/
 dist/
 build/
 .medusa/
+
+# Local environment variables (Passwords/API keys)
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Database files
+*.db
+*.sqlite
