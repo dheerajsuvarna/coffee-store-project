@@ -1,25 +1,77 @@
-name: Build and Deploy Backend
+name: Deploy
+
 on:
   push:
     branches: [main]
-    paths: ['coffee-store/**'] # Only run if backend files change
 
 jobs:
-  build-and-deploy:
+  # ── Detect which services changed ──────────────────────────────────────────
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      storefront: ${{ steps.filter.outputs.storefront }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'coffee-store/**'
+            storefront:
+              - 'coffee-store-storefront/**'
+
+  # ── Deploy Medusa backend → Render ─────────────────────────────────────────
+  deploy-backend:
+    name: Deploy backend → Render
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Build and Push Docker Image
+      - name: Trigger Render deploy hook
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/backend:latest -f coffee-store/Dockerfile .
-          docker push ghcr.io/${{ github.repository }}/backend:latest
+          curl -fsSL -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          echo "Backend deploy triggered on Render"
 
-      - name: Deploy to Railway
-        run: |
-          npm install -g @railway/cli
-          railway up --service="YOUR_SERVICE_ID" -t ${{ secrets.RAILWAY_TOKEN }}
+  # ── Deploy Next.js storefront → Vercel ─────────────────────────────────────
+  deploy-storefront:
+    name: Deploy storefront → Vercel
+    needs: changes
+    if: needs.changes.outputs.storefront == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: coffee-store-storefront/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      # Downloads build env vars (NEXT_PUBLIC_* etc.) from Vercel project settings
+      - name: Pull Vercel environment
+        working-directory: coffee-store-storefront
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      # next build runs here — NEXT_PUBLIC_* vars are baked into the bundle
+      - name: Build
+        working-directory: coffee-store-storefront
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        working-directory: coffee-store-storefront
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
