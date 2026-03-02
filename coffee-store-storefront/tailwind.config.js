@@ -34,6 +34,14 @@ module.exports = {
           80: "#1F2937",
           90: "#111827",
         },
+        berg: {
+          ink: "#111111",
+          red: "#E85D26",
+          "red-dark": "#C74C18",
+          off: "#F8F6F1",
+          muted: "#6B6B6B",
+          rule: "#E5E1D8",
+        },
       },
       borderRadius: {
         none: "0px",
@@ -60,6 +68,7 @@ module.exports = {
       },
       fontFamily: {
         sans: [
+          "var(--font-sans)",
           "Inter",
           "-apple-system",
           "BlinkMacSystemFont",
@@ -69,6 +78,7 @@ module.exports = {
           "Ubuntu",
           "sans-serif",
         ],
+        display: ["var(--font-display)", "Georgia", "serif"],
       },
       keyframes: {
         ring: {

@@ -20,3 +20,5 @@ out/
 # Database files
 *.db
 *.sqlite
+
+knowledge/

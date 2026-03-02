@@ -54,6 +54,22 @@
     @apply max-w-[1440px] w-full mx-auto px-6;
   }
 
+  .berg-btn {
+    @apply px-8 py-3 bg-berg-red text-white hover:bg-berg-red-dark tracking-widest uppercase text-xs font-sans font-semibold transition-colors duration-200 inline-block;
+  }
+
+  .berg-btn-outline {
+    @apply px-8 py-3 border border-white/40 text-white hover:bg-white/10 tracking-widest uppercase text-xs font-sans font-semibold transition-colors duration-200 inline-block;
+  }
+
+  .section-eyebrow {
+    @apply text-berg-red text-xs tracking-[0.3em] uppercase font-sans;
+  }
+
+  .section-heading {
+    @apply font-display text-4xl small:text-6xl font-bold;
+  }
+
   .contrast-btn {
     @apply px-4 py-2 border border-black rounded-full hover:bg-black hover:text-white transition-colors duration-200 ease-in;
   }

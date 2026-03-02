@@ -1,0 +1,25 @@
+name: Build and Deploy Backend
+on:
+  push:
+    branches: [main]
+    paths: ['coffee-store/**'] # Only run if backend files change
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/backend:latest -f coffee-store/Dockerfile .
+          docker push ghcr.io/${{ github.repository }}/backend:latest
+
+      - name: Deploy to Railway
+        run: |
+          npm install -g @railway/cli
+          railway up --service="YOUR_SERVICE_ID" -t ${{ secrets.RAILWAY_TOKEN }}

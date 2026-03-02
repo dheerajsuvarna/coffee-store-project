@@ -28,9 +28,9 @@ export default async function ProductRail({
 
   return (
     <div className="content-container py-12 small:py-24">
-      <div className="flex justify-between mb-8">
-        <Text className="txt-xlarge">{collection.title}</Text>
-        <InteractiveLink href={`/collections/${collection.handle}`}>
+      <div className="flex justify-between mb-8 items-baseline">
+        <h2 className="font-display text-3xl font-bold text-berg-ink">{collection.title}</h2>
+        <InteractiveLink href={`/collections/${collection.handle}`} className="text-berg-red hover:text-berg-red-dark">
           View all
         </InteractiveLink>
       </div>

@@ -28,17 +28,26 @@ export default async function Nav() {
           <div className="flex items-center h-full">
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase"
+              className="font-display font-bold tracking-[0.15em] text-lg text-berg-ink hover:text-berg-red transition-colors uppercase"
               data-testid="nav-store-link"
             >
-              Medusa Store
+              Bergkraft
             </LocalizedClientLink>
           </div>
 
           <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
-            <div className="hidden small:flex items-center gap-x-6 h-full">
+            <div className="hidden small:flex items-center gap-x-6 h-full text-xs font-sans uppercase tracking-widest text-berg-muted">
+              <LocalizedClientLink className="hover:text-berg-ink transition-colors" href="/store">
+                Shop
+              </LocalizedClientLink>
+              <LocalizedClientLink className="hover:text-berg-ink transition-colors" href="/collections">
+                Collections
+              </LocalizedClientLink>
+              <LocalizedClientLink className="hover:text-berg-ink transition-colors" href="/categories">
+                Categories
+              </LocalizedClientLink>
               <LocalizedClientLink
-                className="hover:text-ui-fg-base"
+                className="hover:text-berg-ink transition-colors"
                 href="/account"
                 data-testid="nav-account-link"
               >

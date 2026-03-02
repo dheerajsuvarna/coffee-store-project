@@ -63,7 +63,8 @@ export default async function seedDemoData({ container }: ExecArgs) {
   const salesChannelModuleService = container.resolve(Modules.SALES_CHANNEL);
   const storeModuleService = container.resolve(Modules.STORE);
 
-  const countries = ["gb", "de", "dk", "se", "fr", "es", "it"];
+  const euCountries = ["gb", "de", "dk", "se", "fr", "es", "it"];
+  const naCountries = ["us", "ca"];
 
   logger.info("Seeding store data...");
   const [store] = await storeModuleService.listStores();
@@ -115,20 +116,26 @@ export default async function seedDemoData({ container }: ExecArgs) {
     input: {
       regions: [
         {
+          name: "North America",
+          currency_code: "usd",
+          countries: naCountries,
+          payment_providers: ["pp_system_default"],
+        },
+        {
           name: "Europe",
           currency_code: "eur",
-          countries,
+          countries: euCountries,
           payment_providers: ["pp_system_default"],
         },
       ],
     },
   });
-  const region = regionResult[0];
+  const region = regionResult[0]; // North America (USD default)
   logger.info("Finished seeding regions.");
 
   logger.info("Seeding tax regions...");
   await createTaxRegionsWorkflow(container).run({
-    input: countries.map((country_code) => ({
+    input: [...naCountries, ...euCountries].map((country_code) => ({
       country_code,
       provider_id: "tp_system",
     })),
@@ -142,7 +149,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
     input: {
       locations: [
         {
-          name: "European Warehouse",
+          name: "Bergkraft Main Warehouse",
           address: {
             city: "Copenhagen",
             country_code: "DK",
@@ -194,40 +201,23 @@ export default async function seedDemoData({ container }: ExecArgs) {
   }
 
   const fulfillmentSet = await fulfillmentModuleService.createFulfillmentSets({
-    name: "European Warehouse delivery",
+    name: "Main Warehouse delivery",
     type: "shipping",
     service_zones: [
       {
-        name: "Europe",
+        name: "Worldwide",
         geo_zones: [
-          {
-            country_code: "gb",
-            type: "country",
-          },
-          {
-            country_code: "de",
-            type: "country",
-          },
-          {
-            country_code: "dk",
-            type: "country",
-          },
-          {
-            country_code: "se",
-            type: "country",
-          },
-          {
-            country_code: "fr",
-            type: "country",
-          },
-          {
-            country_code: "es",
-            type: "country",
-          },
-          {
-            country_code: "it",
-            type: "country",
-          },
+          // North America
+          { country_code: "us", type: "country" },
+          { country_code: "ca", type: "country" },
+          // Europe
+          { country_code: "gb", type: "country" },
+          { country_code: "de", type: "country" },
+          { country_code: "dk", type: "country" },
+          { country_code: "se", type: "country" },
+          { country_code: "fr", type: "country" },
+          { country_code: "es", type: "country" },
+          { country_code: "it", type: "country" },
         ],
       },
     ],
@@ -377,22 +367,9 @@ export default async function seedDemoData({ container }: ExecArgs) {
   ).run({
     input: {
       product_categories: [
-        {
-          name: "Shirts",
-          is_active: true,
-        },
-        {
-          name: "Sweatshirts",
-          is_active: true,
-        },
-        {
-          name: "Pants",
-          is_active: true,
-        },
-        {
-          name: "Merch",
-          is_active: true,
-        },
+        { name: "Coffee Beans", is_active: true },
+        { name: "Equipment", is_active: true },
+        { name: "Merchandise", is_active: true },
       ],
     },
   });
@@ -400,495 +377,175 @@ export default async function seedDemoData({ container }: ExecArgs) {
   await createProductsWorkflow(container).run({
     input: {
       products: [
+        // ── Espresso Blend ────────────────────────────────────────────────────
         {
-          title: "Medusa T-Shirt",
+          title: "Bergkraft Espresso Blend",
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Shirts")!.id,
+            categoryResult.find((cat) => cat.name === "Coffee Beans")!.id,
           ],
           description:
-            "Reimagine the feeling of a classic T-shirt. With our cotton T-shirts, everyday essentials no longer have to be ordinary.",
-          handle: "t-shirt",
-          weight: 400,
+            "Rich and bold espresso with notes of dark chocolate and caramel. Single origin, ethically sourced from the highlands of Ethiopia.",
+          handle: "espresso-blend",
+          weight: 250,
           status: ProductStatus.PUBLISHED,
           shipping_profile_id: shippingProfile.id,
-          images: [
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/tee-black-front.png",
-            },
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/tee-black-back.png",
-            },
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/tee-white-front.png",
-            },
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/tee-white-back.png",
-            },
-          ],
-          options: [
-            {
-              title: "Size",
-              values: ["S", "M", "L", "XL"],
-            },
-            {
-              title: "Color",
-              values: ["Black", "White"],
-            },
-          ],
+          options: [{ title: "Weight", values: ["250g", "500g", "1kg"] }],
           variants: [
             {
-              title: "S / Black",
-              sku: "SHIRT-S-BLACK",
-              options: {
-                Size: "S",
-                Color: "Black",
-              },
+              title: "250g",
+              sku: "BKESPRESSO-250G",
+              options: { Weight: "250g" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 1299, currency_code: "eur" },
+                { amount: 1499, currency_code: "usd" },
               ],
             },
             {
-              title: "S / White",
-              sku: "SHIRT-S-WHITE",
-              options: {
-                Size: "S",
-                Color: "White",
-              },
+              title: "500g",
+              sku: "BKESPRESSO-500G",
+              options: { Weight: "500g" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 2399, currency_code: "eur" },
+                { amount: 2699, currency_code: "usd" },
               ],
             },
             {
-              title: "M / Black",
-              sku: "SHIRT-M-BLACK",
-              options: {
-                Size: "M",
-                Color: "Black",
-              },
+              title: "1kg",
+              sku: "BKESPRESSO-1KG",
+              options: { Weight: "1kg" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "M / White",
-              sku: "SHIRT-M-WHITE",
-              options: {
-                Size: "M",
-                Color: "White",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "L / Black",
-              sku: "SHIRT-L-BLACK",
-              options: {
-                Size: "L",
-                Color: "Black",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "L / White",
-              sku: "SHIRT-L-WHITE",
-              options: {
-                Size: "L",
-                Color: "White",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "XL / Black",
-              sku: "SHIRT-XL-BLACK",
-              options: {
-                Size: "XL",
-                Color: "Black",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "XL / White",
-              sku: "SHIRT-XL-WHITE",
-              options: {
-                Size: "XL",
-                Color: "White",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 4199, currency_code: "eur" },
+                { amount: 4799, currency_code: "usd" },
               ],
             },
           ],
-          sales_channels: [
-            {
-              id: defaultSalesChannel[0].id,
-            },
-          ],
+          sales_channels: [{ id: defaultSalesChannel[0].id }],
         },
+        // ── House Blend ───────────────────────────────────────────────────────
         {
-          title: "Medusa Sweatshirt",
+          title: "Bergkraft House Blend",
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Sweatshirts")!.id,
+            categoryResult.find((cat) => cat.name === "Coffee Beans")!.id,
           ],
           description:
-            "Reimagine the feeling of a classic sweatshirt. With our cotton sweatshirt, everyday essentials no longer have to be ordinary.",
-          handle: "sweatshirt",
-          weight: 400,
+            "Our signature smooth and balanced blend with hints of hazelnut and vanilla. Ideal for drip, pour-over, or French press.",
+          handle: "house-blend",
+          weight: 250,
           status: ProductStatus.PUBLISHED,
           shipping_profile_id: shippingProfile.id,
-          images: [
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/sweatshirt-vintage-front.png",
-            },
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/sweatshirt-vintage-back.png",
-            },
-          ],
           options: [
-            {
-              title: "Size",
-              values: ["S", "M", "L", "XL"],
-            },
+            { title: "Weight", values: ["250g", "500g"] },
+            { title: "Grind", values: ["Whole Bean", "Ground (Medium)"] },
           ],
           variants: [
             {
-              title: "S",
-              sku: "SWEATSHIRT-S",
-              options: {
-                Size: "S",
-              },
+              title: "250g / Whole Bean",
+              sku: "BKHOUSE-250G-WB",
+              options: { Weight: "250g", Grind: "Whole Bean" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 1099, currency_code: "eur" },
+                { amount: 1299, currency_code: "usd" },
               ],
             },
             {
-              title: "M",
-              sku: "SWEATSHIRT-M",
-              options: {
-                Size: "M",
-              },
+              title: "500g / Whole Bean",
+              sku: "BKHOUSE-500G-WB",
+              options: { Weight: "500g", Grind: "Whole Bean" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 1999, currency_code: "eur" },
+                { amount: 2299, currency_code: "usd" },
               ],
             },
             {
-              title: "L",
-              sku: "SWEATSHIRT-L",
-              options: {
-                Size: "L",
-              },
+              title: "250g / Ground (Medium)",
+              sku: "BKHOUSE-250G-GRD",
+              options: { Weight: "250g", Grind: "Ground (Medium)" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 1099, currency_code: "eur" },
+                { amount: 1299, currency_code: "usd" },
               ],
             },
             {
-              title: "XL",
-              sku: "SWEATSHIRT-XL",
-              options: {
-                Size: "XL",
-              },
+              title: "500g / Ground (Medium)",
+              sku: "BKHOUSE-500G-GRD",
+              options: { Weight: "500g", Grind: "Ground (Medium)" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 1999, currency_code: "eur" },
+                { amount: 2299, currency_code: "usd" },
               ],
             },
           ],
-          sales_channels: [
-            {
-              id: defaultSalesChannel[0].id,
-            },
-          ],
+          sales_channels: [{ id: defaultSalesChannel[0].id }],
         },
+        // ── French Press ──────────────────────────────────────────────────────
         {
-          title: "Medusa Sweatpants",
+          title: "Bergkraft Premium French Press",
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Pants")!.id,
+            categoryResult.find((cat) => cat.name === "Equipment")!.id,
           ],
           description:
-            "Reimagine the feeling of classic sweatpants. With our cotton sweatpants, everyday essentials no longer have to be ordinary.",
-          handle: "sweatpants",
-          weight: 400,
+            "Stainless steel French Press with double-wall insulation for the perfect cup every time. Includes a starter pack of House Blend.",
+          handle: "french-press",
+          weight: 800,
           status: ProductStatus.PUBLISHED,
           shipping_profile_id: shippingProfile.id,
-          images: [
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/sweatpants-gray-front.png",
-            },
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/sweatpants-gray-back.png",
-            },
-          ],
-          options: [
-            {
-              title: "Size",
-              values: ["S", "M", "L", "XL"],
-            },
-          ],
+          options: [{ title: "Capacity", values: ["350ml", "1000ml"] }],
           variants: [
             {
-              title: "S",
-              sku: "SWEATPANTS-S",
-              options: {
-                Size: "S",
-              },
+              title: "350ml",
+              sku: "BKFP-350ML",
+              options: { Capacity: "350ml" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 2699, currency_code: "eur" },
+                { amount: 2999, currency_code: "usd" },
               ],
             },
             {
-              title: "M",
-              sku: "SWEATPANTS-M",
-              options: {
-                Size: "M",
-              },
+              title: "1000ml",
+              sku: "BKFP-1000ML",
+              options: { Capacity: "1000ml" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "L",
-              sku: "SWEATPANTS-L",
-              options: {
-                Size: "L",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "XL",
-              sku: "SWEATPANTS-XL",
-              options: {
-                Size: "XL",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 3999, currency_code: "eur" },
+                { amount: 4499, currency_code: "usd" },
               ],
             },
           ],
-          sales_channels: [
-            {
-              id: defaultSalesChannel[0].id,
-            },
-          ],
+          sales_channels: [{ id: defaultSalesChannel[0].id }],
         },
+        // ── Tote Bag ──────────────────────────────────────────────────────────
         {
-          title: "Medusa Shorts",
+          title: "Bergkraft Canvas Tote Bag",
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Merch")!.id,
+            categoryResult.find((cat) => cat.name === "Merchandise")!.id,
           ],
           description:
-            "Reimagine the feeling of classic shorts. With our cotton shorts, everyday essentials no longer have to be ordinary.",
-          handle: "shorts",
-          weight: 400,
+            "Sustainable heavyweight canvas tote with the Bergkraft logo, screen-printed with water-based inks.",
+          handle: "canvas-tote-bag",
+          weight: 300,
           status: ProductStatus.PUBLISHED,
           shipping_profile_id: shippingProfile.id,
-          images: [
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/shorts-vintage-front.png",
-            },
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/shorts-vintage-back.png",
-            },
-          ],
-          options: [
-            {
-              title: "Size",
-              values: ["S", "M", "L", "XL"],
-            },
-          ],
+          options: [{ title: "Color", values: ["Natural", "Black"] }],
           variants: [
             {
-              title: "S",
-              sku: "SHORTS-S",
-              options: {
-                Size: "S",
-              },
+              title: "Natural",
+              sku: "BKTOTE-NAT",
+              options: { Color: "Natural" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 1799, currency_code: "eur" },
+                { amount: 1999, currency_code: "usd" },
               ],
             },
             {
-              title: "M",
-              sku: "SHORTS-M",
-              options: {
-                Size: "M",
-              },
+              title: "Black",
+              sku: "BKTOTE-BLK",
+              options: { Color: "Black" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "L",
-              sku: "SHORTS-L",
-              options: {
-                Size: "L",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "XL",
-              sku: "SHORTS-XL",
-              options: {
-                Size: "XL",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 1799, currency_code: "eur" },
+                { amount: 1999, currency_code: "usd" },
               ],
             },
           ],
-          sales_channels: [
-            {
-              id: defaultSalesChannel[0].id,
-            },
-          ],
+          sales_channels: [{ id: defaultSalesChannel[0].id }],
         },
       ],
     },

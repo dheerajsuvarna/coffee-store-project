@@ -1,0 +1,33 @@
+# Dependencies (will be installed fresh in container)
+node_modules
+
+# Build outputs (will be built fresh)
+.medusa
+dist
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+
+# Environment files (secrets should come from env vars)
+.env
+.env.*
+!.env.template
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test files
+*.test.ts
+*.spec.ts
+__tests__
+coverage
+
+# Documentation
+README.md
+docs
