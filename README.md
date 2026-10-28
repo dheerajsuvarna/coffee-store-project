@@ -15,7 +15,7 @@
 
 **A complete online shop for my own coffee brand: storefront, admin dashboard, catalogue, checkout and an automated deployment pipeline.**
 
-[**🌐 Live store**](https://bergkraft.vercel.app) · [The idea](#-the-idea) · [What I built](#-what-i-built) · [Architecture](#-architecture) · [Quick start](#-quick-start) · [Technical details](#-technical-details)
+[**🌐 Live store**](https://bergkraft.vercel.app) · [The idea](#-the-idea) · [Built with Claude Code](#-built-at-ai-speed-with-claude-code) · [What I built](#-what-i-built) · [Architecture](#-architecture) · [Quick start](#-quick-start) · [Technical details](#-technical-details)
 
 </div>
 
@@ -28,6 +28,66 @@ Bergkraft is a personal venture: a specialty coffee brand that sells directly to
 This repository is the technology behind that brand. It is a real, hosted web shop that was running for my coffee business, not a tutorial project.
 
 **The brand story the store tells:** single-origin beans, ethically traded, small-batch roasting and expert curation, with a guide that helps customers find the brewing method that suits them.
+
+---
+
+## ⚡ Built at AI speed with Claude Code
+
+This store was built by **one person working with an AI coding agent**. I acted as product owner and Claude Code acted as the engineering team: I decided what the shop needed and how it should feel, Claude Code wrote the code, and I ran it, reviewed it and steered it until it worked in production.
+
+<div align="center">
+
+| 🕒 | 🤖 | 🚢 |
+|:---:|:---:|:---:|
+| **Under 3 hours**<br/>from empty repository to a committed, working monorepo with storefront and backend | **Every deployment commit<br/>co-authored with Claude**<br/>visible in the git history | **74 minutes**<br/>to fix admin login, move to production hosting, build the CI/CD pipeline and unblock authentication |
+
+</div>
+
+### The timeline, straight from the git history
+
+```mermaid
+timeline
+    title From idea to live store
+    22 Jan 2026 : 18:32 Repository created
+                : 21:08 Storefront and backend integrated into one monorepo (252 files)
+                : 21:21 Hydration error fixed
+    2 Mar 2026 : 09:50 Admin dashboard login and session issues fixed
+               : 10:08 Production deployment config and storefront build added
+               : 10:16 CI/CD pipeline rewritten for Render and Vercel
+               : 11:04 Production authentication unblocked
+```
+
+### How I work with Claude Code
+
+```mermaid
+flowchart LR
+    A[🎯 Define the outcome<br/>what the shop needs] --> B[🤖 Claude Code<br/>writes the code]
+    B --> C[▶️ Run it<br/>and review the result]
+    C -->|works| D[🚢 Commit and deploy]
+    C -->|breaks| E[🔎 Feed back the error<br/>and the logs]
+    E --> B
+    D --> F[📈 Next feature]
+    F --> A
+```
+
+1. **Define the outcome.** I describe what the customer should see and what the business needs, not how to code it.
+2. **Let the agent build.** Claude Code writes the code, config and scripts across the whole stack.
+3. **Run and review.** I run the stack, check the behaviour and read what was produced.
+4. **Close the loop.** When something breaks, I feed the error and logs back, and we fix it together.
+5. **Ship.** Changes go through the automated pipeline to production.
+
+### Real problems solved with the AI in the loop
+
+| Problem found | What it taught me | Fix |
+|---|---|---|
+| React **hydration error** on the storefront | Server and client rendered different content | Suppressed the mismatch at the source |
+| **Admin dashboard login** and session failures | Session and cookie settings differ between local and hosted setups | Fixed the session handling so the admin works behind the production proxy |
+| **Hosting move** from Railway to Render and Vercel | The backend and storefront have different hosting needs | Rewrote the pipeline so each service deploys on its own |
+| **Authentication blocked in production** | A Redis setting that worked locally was blocking logins on Render | Removed it from the production configuration |
+
+### Why this matters
+
+AI coding agents let one product person build and ship what used to need a small team. The skill that makes it work is not typing code. It is knowing **what to build, how to judge whether it works, and how to debug it when it does not**. That is the product work, and it is what this project shows.
 
 ---
 
