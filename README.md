@@ -15,6 +15,8 @@
 
 **A complete online shop for my own coffee brand: storefront, admin dashboard, catalogue, checkout and an automated deployment pipeline.**
 
+> 🧑‍💻 **A personal project, built on my own.** I designed, built and deployed Bergkraft alone, working with Claude Code as my AI engineering partner.
+
 [**🌐 Live store**](https://bergkraft.vercel.app) · [The idea](#-the-idea) · [Built with Claude Code](#-built-at-ai-speed-with-claude-code) · [What I built](#-what-i-built) · [Architecture](#-architecture) · [Quick start](#-quick-start) · [Technical details](#-technical-details)
 
 </div>
@@ -80,10 +82,10 @@ flowchart LR
 
 | Problem found | What it taught me | Fix |
 |---|---|---|
-| React **hydration error** on the storefront | Server and client rendered different content | Suppressed the mismatch at the source |
-| **Admin dashboard login** and session failures | Session and cookie settings differ between local and hosted setups | Fixed the session handling so the admin works behind the production proxy |
-| **Hosting move** from Railway to Render and Vercel | The backend and storefront have different hosting needs | Rewrote the pipeline so each service deploys on its own |
-| **Authentication blocked in production** | A Redis setting that worked locally was blocking logins on Render | Removed it from the production configuration |
+| React **hydration error** on the storefront | The server and the browser rendered different content | Resolved by suppressing the mismatch warnings |
+| **Admin dashboard login** and session failures | Admin access has to work in the hosted setup, not only on a laptop | Fixed the login and session handling |
+| **Hosting move** from Railway to Render and Vercel | The backend and the storefront have different hosting needs | Rewrote the pipeline so each service deploys on its own |
+| **Authentication blocked in production** | A Redis setting in the backend configuration was blocking logins on Render | Removed it from the production configuration |
 
 ### Why this matters
 
